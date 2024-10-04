@@ -192,6 +192,8 @@ def setupSDK():
     if platform.uname()[0] == "Linux":
         if platform.uname()[4] == "x86_64":
             hcnetsdk_path = os.path.join("libs", "libhcnetsdk.so")
+            if not os.path.exists(hcnetsdk_path):
+                hcnetsdk_path = os.path.join(os.path.dirname(__file__), "libs", "libhcnetsdk.so")
         elif platform.uname()[4] == "aarch64":
             hcnetsdk_path = os.path.join("lib-aarch64", "libhcnetsdk.so")
         else:

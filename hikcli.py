@@ -1,10 +1,11 @@
 from hcnetsdk import (
-    NET_DVR_DEVICEINFO_V30,
+    NET_DVR_DEVICEINFO_V40,
     NET_DVR_CONTROL_GATEWAY,
     NET_DVR_AUDIOENC_INFO,
     NET_DVR_AUDIOENC_PROCESS_PARAM,
     NET_DVR_AUDIO_CHANNEL,
     NET_DVR_COMPRESSION_AUDIO,
+    NET_DVR_USER_LOGIN_INFO,
     setupSDK,
 )
 from ctypes import (
@@ -36,18 +37,15 @@ class HikVision:
         self._sdk.NET_DVR_SetValidIP(0, True)
 
     def login(self):
-        device_info = NET_DVR_DEVICEINFO_V30()
-        user_id = self._sdk.NET_DVR_Login_V30(
-            self._ip.encode("utf-8"),
-            8000,
-            self._username.encode("utf-8"),
-            self._password.encode("utf-8"),
-            device_info,
-        )
+        device_info = NET_DVR_DEVICEINFO_V40()
+        login_info = NET_DVR_USER_LOGIN_INFO()
+        login_info.sUserName = self._username.encode("utf-8")
+        login_info.sDeviceAddress = self._ip.encode("utf-8")
+        login_info.sPassword = self._password.encode("utf-8")
+        login_info.wPort = 8000
+        user_id = self._sdk.NET_DVR_Login_V40(byref(login_info), byref(device_info))
         if user_id < 0:
-            raise RuntimeError(
-                f"NET_DVR_Login_V30 failed, error code = {self._sdk.NET_DVR_GetLastError()}"
-            )
+            self._handle_error("Failed to login: {}")
         print(f"Logged in with {user_id}")
         self._user_id = user_id
 
@@ -69,6 +67,7 @@ class HikVision:
 
         if result < 0:
             self._handle_error("Failed to unlock: {}")
+        print("Unlocked door")
 
     def _handle_error(self, message="Api failed: {}"):
         errono = self._sdk.NET_DVR_GetLastError()
@@ -121,7 +120,7 @@ class HikVision:
 
     def logout(self):
         if self._user_id:
-            self._sdk.NET_DVR_Logout_V30(self._user_id)
+            self._sdk.NET_DVR_Logout(self._user_id)
         self._sdk.NET_DVR_Cleanup()
 
 

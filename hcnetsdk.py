@@ -329,7 +329,7 @@ class NET_DVR_DEVICEINFO_V40(Structure):
         ("byCharEncodeType", BYTE),
         ("bySupportDev5", BYTE),
         ("byLoginMode", BYTE),
-        ("byRes2", BYTE * 253),
+        ("byRes2", BYTE * 199),
     ]
 
 
